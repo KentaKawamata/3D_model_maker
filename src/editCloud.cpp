@@ -1,7 +1,5 @@
 #include <pcl/filters/passthrough.h>
-#include <pcl/common/transforms.h>
-#include <pcl/octree/octree.h>
-#include <pcl/io/auto_io.h>
+//#include <pcl/common/transforms.h>
 #include <pcl/filters/statistical_outlier_removal.h>
 #include <pcl/surface/mls.h>
 #include <cmath>

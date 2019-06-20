@@ -2,7 +2,6 @@
 #define EDIT_CLOUD_H
 
 #include <pcl/point_types.h>
-#include <pcl/io/auto_io.h>
 #include <Eigen/Core>
 #include <Eigen/LU>
 
