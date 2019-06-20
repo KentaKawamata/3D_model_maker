@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<datas>
+    <resolution>0.0001</resolution>
+    <bagData>/home/kawa/Measure0222/bagData/4m/4m1.bag</bagData>
+    <plyData>/home/kawa/Measure0222/hogehoge</plyData>
+    <rotationData>/home/kawa/Measure0222/roteData/4m/4m10.txt</rotationData>
+    <saveDir>/home/kawa/Measure0222/rotedPLY/4m/4m1.ply</saveDir>
+</datas>
