@@ -8,6 +8,7 @@
 #include "./../include/editCloud.hpp"
 
 EditCloud::EditCloud() : 
+    cloud (new pcl::PointCloud<pcl::PointXYZ>()),
     over_cloud (new pcl::PointCloud<pcl::PointXYZ>()),
     under_cloud (new pcl::PointCloud<pcl::PointXYZ>())
 {
@@ -17,7 +18,7 @@ EditCloud::~EditCloud(){
 
 }
 
-void EditCloud::smooth(pcl::PointCloud<pcl::PointXYZ>::Ptr &cloud) {
+void EditCloud::smooth() {
    
     pcl::search::KdTree<pcl::PointXYZ>::Ptr tree (new pcl::search::KdTree<pcl::PointXYZ>);//Kdtreeの作成
 
@@ -38,7 +39,7 @@ void EditCloud::smooth(pcl::PointCloud<pcl::PointXYZ>::Ptr &cloud) {
     pcl::copyPointCloud(mls_points, *cloud);
 }
 
-void EditCloud::rangeFilter(pcl::PointCloud<pcl::PointXYZ>::Ptr &cloud) {
+void EditCloud::rangeFilter() {
 
     pcl::PassThrough<pcl::PointXYZ> passX;
     passX.setInputCloud(cloud);
@@ -62,12 +63,12 @@ void EditCloud::rangeFilter(pcl::PointCloud<pcl::PointXYZ>::Ptr &cloud) {
     passZ.filter(*cloud);
 }
 
-void EditCloud::outline(pcl::PointCloud<pcl::PointXYZ>::Ptr &cloud){
+void EditCloud::outline(){
 
     pcl::StatisticalOutlierRemoval<pcl::PointXYZ> sor;
     sor.setInputCloud(cloud);
-    sor.setMeanK(5);
-    sor.setStddevMulThresh(0.001);
+    sor.setMeanK(50);
+    sor.setStddevMulThresh(1.0);
     sor.filter(*cloud);
 
     /*     
@@ -83,9 +84,20 @@ void EditCloud::outline(pcl::PointCloud<pcl::PointXYZ>::Ptr &cloud){
 
 void EditCloud::filter() {
 
-    rangeFilter(over_cloud);
-    rangeFilter(under_cloud);
+    cloud.reset(new pcl::PointCloud<pcl::PointXYZ>);
 
-    outline(over_cloud);
-    outline(under_cloud);
+    //over_cloud
+    pcl::copyPointCloud(*over_cloud, *cloud);
+    rangeFilter();
+    std::cout << "point size : " << cloud->size() << std::endl;
+    outline();
+    pcl::copyPointCloud(*cloud, *over_cloud);
+
+    cloud.reset(new pcl::PointCloud<pcl::PointXYZ>);
+
+    //under_cloud
+    pcl::copyPointCloud(*under_cloud, *cloud);
+    rangeFilter();
+    outline();
+    pcl::copyPointCloud(*cloud, *under_cloud);
 }
