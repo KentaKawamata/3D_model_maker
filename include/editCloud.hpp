@@ -12,15 +12,16 @@ public:
     ~EditCloud();
     void filter();
 
+    pcl::PointCloud<pcl::PointXYZ>::Ptr cloud;
     pcl::PointCloud<pcl::PointXYZ>::Ptr over_cloud;
     pcl::PointCloud<pcl::PointXYZ>::Ptr under_cloud;
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW 
 
 private:
 
-    void smooth(pcl::PointCloud<pcl::PointXYZ>::Ptr &cloud);
-    void rangeFilter(pcl::PointCloud<pcl::PointXYZ>::Ptr &cloud);
-    void outline(pcl::PointCloud<pcl::PointXYZ>::Ptr &cloud);
+    void smooth();
+    void rangeFilter();
+    void outline();
 };
 
 #endif //EDIT_CLOUD_H
