@@ -89,7 +89,6 @@ void EditCloud::filter() {
     //over_cloud
     pcl::copyPointCloud(*over_cloud, *cloud);
     rangeFilter();
-    std::cout << "point size : " << cloud->size() << std::endl;
     outline();
     pcl::copyPointCloud(*cloud, *over_cloud);
 

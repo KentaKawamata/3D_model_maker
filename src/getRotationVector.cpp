@@ -4,7 +4,14 @@ GetRotationVector::GetRotationVector() :
     R3d (Eigen::Matrix3d::Identity()),
     under_R3d (Eigen::Matrix3d::Identity()),
     R (Eigen::Matrix4d::Identity()),
-    under_R (Eigen::Matrix4d::Identity())
+    under_R (Eigen::Matrix4d::Identity()),
+    tpclX(0.0),
+    tpclY(0.0),
+    tpclZ(0.0),
+    pitch(0.0),
+    under_pitch(0.0),
+    roll(0.0),
+    yaw(0.0)
 {
 }
 

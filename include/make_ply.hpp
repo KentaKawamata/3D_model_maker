@@ -16,7 +16,7 @@
 #include <Eigen/Core>
 #include <Eigen/LU>
 
-#include "./../include/getRotationVector.hpp"
+//#include "./../include/getRotationVector.hpp"
 #include "./../include/editCloud.hpp"
 
 class ROStoPCL {
@@ -26,6 +26,15 @@ private:
     double RrosX;
     double RrosY;
     double RrosZ;
+
+    double roll;
+    double pitch;
+    double yaw;
+    double under_pitch;
+
+    double tpclX;
+    double tpclY;
+    double tpclZ;
 
     int count;
     int over_pc_num;
@@ -62,6 +71,11 @@ private:
 
     void addPointCloud();
     void savePointcloud();
+
+    void eulerToRote();
+    void setOverRotate4();
+    void setUnderRotate4();
+
     void transformPointCloud();
 
     void quaternion_to_euler(geometry_msgs::TransformStamped &ts); 
@@ -73,7 +87,7 @@ public:
     ~ROStoPCL();
     void run();
 
-    GetRotationVector *rotevec;
+    //GetRotationVector *rotevec;
     EditCloud *edit; 
 
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
