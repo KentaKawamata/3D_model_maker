@@ -5,11 +5,10 @@
 #include <tf2_ros/transform_listener.h>
 #include <tf2_ros/static_transform_broadcaster.h>
 #include <geometry_msgs/TransformStamped.h>
-#include <pcl_ros/transforms.h>
+//#include <pcl_ros/transforms.h>
 
 #include <pcl/common/transforms.h>
 #include <pcl/io/ply_io.h>
-#include <pcl/filters/passthrough.h>
 
 #include "./../include/make_ply.hpp"
 
@@ -25,12 +24,12 @@ ROStoPCL::ROStoPCL(ros::NodeHandle &nh) :
     under_cloud_sub(nh.subscribe(under_cloud_frame, 1, &ROStoPCL::getUnderPointCloud_callback, this))
 {
     get_params();
-    //rotevec = new GetRotationVector();
+    rotevec = new GetRotationVector();
     edit = new EditCloud();
 }
 
 ROStoPCL::~ROStoPCL() {
-    //delete rotevec; 
+    delete rotevec; 
     delete edit;
 }
 
@@ -120,75 +119,6 @@ void ROStoPCL::transformPointCloud() {
     savePointcloud();
 }
 
-void ROStoPCL::setOverRotate4(){
-
-    R(0,0) = R3d(0,0);
-    R(0,1) = R3d(0,1);
-    R(0,2) = R3d(0,2);
- 
-    R(1,0) = R3d(1,0);
-    R(1,1) = R3d(1,1);
-    R(1,2) = R3d(1,2);
- 
-    R(2,0) = R3d(2,0);
-    R(2,1) = R3d(2,1);
-    R(2,2) = R3d(2,2);
-
-    R(0,3) = tpclX; 
-    R(1,3) = tpclY; 
-    R(2,3) = tpclZ;
-    R(3,3) = 1.0;
-}
-
-void ROStoPCL::setUnderRotate4(){
-
-    under_R(0,0) = under_R3d(0,0);
-    under_R(0,1) = under_R3d(0,1);
-    under_R(0,2) = under_R3d(0,2);
- 
-    under_R(1,0) = under_R3d(1,0);
-    under_R(1,1) = under_R3d(1,1);
-    under_R(1,2) = under_R3d(1,2);
- 
-    under_R(2,0) = under_R3d(2,0);
-    under_R(2,1) = under_R3d(2,1);
-    under_R(2,2) = under_R3d(2,2);
-
-    under_R(0,3) = tpclX; 
-    under_R(1,3) = tpclY; 
-    under_R(2,3) = tpclZ;
-    under_R(3,3) = 1.0;
-}
-
-void ROStoPCL::eulerToRote(){
-
-    Eigen::Matrix3d Rpi;
-    Eigen::Matrix3d Ryo;
-    Eigen::Matrix3d Rro;
-    Eigen::Matrix3d under_Rpi;
-
-    Rpi << 1, 0, 0,  
-           0, cos(pitch), sin(pitch),  
-           0, -sin(pitch), cos(pitch); 
-
-    Ryo << cos(yaw), 0, -sin(yaw), 
-           0, 1, 0, 
-           sin(yaw), 0, cos(yaw);
-
-    Rro << cos(roll), sin(roll), 0, 
-           -sin(roll), cos(roll), 0, 
-           0, 0, 1; 
-
-    under_Rpi << 1, 0, 0,  
-           0, cos(under_pitch), sin(under_pitch),  
-           0, -sin(under_pitch), cos(under_pitch); 
-
-    R3d = Rpi * Ryo * Rro;
-    under_R3d = under_Rpi * Ryo * Rro;
-}
-
-
-
 void ROStoPCL::quaternion_to_euler(geometry_msgs::TransformStamped &ts) {
 
     translation.setValue(ts.transform.translation.x,
@@ -205,9 +135,9 @@ void ROStoPCL::quaternion_to_euler(geometry_msgs::TransformStamped &ts) {
      *              ||    ||
      ***********************************************************************/
     //////////////////////////////////
-    tpclZ =  translation.getX();
-    tpclY = -translation.getZ();
-    tpclX = -translation.getY();
+    rotevec->tpclZ =  translation.getX();
+    rotevec->tpclY = -translation.getZ();
+    rotevec->tpclX = -translation.getY();
     //////////////////////////////////
 
     rotation.setValue(ts.transform.rotation.x,
@@ -241,10 +171,10 @@ void ROStoPCL::quaternion_to_euler(geometry_msgs::TransformStamped &ts) {
      *　｀ーー‐'　　　￣￣￣　　｀~└─―┘
      ***********************************************************************/
     ////////////////////////////////////////////////////////////
-    roll  = -RrosX;
-    pitch =  RrosY;
-    yaw   =  RrosZ;
-    under_pitch = pitch + (40.0*M_PI/180);
+    rotevec->roll  = -RrosX;
+    rotevec->pitch =  RrosY;
+    rotevec->yaw   =  RrosZ;
+    rotevec->under_pitch = RrosY + (40.0*M_PI/180);
     ////////////////////////////////////////////////////////////
 
     //ROS_INFO("ROLL : %f", (float)roll/M_PI*180);
@@ -253,9 +183,10 @@ void ROStoPCL::quaternion_to_euler(geometry_msgs::TransformStamped &ts) {
 void ROStoPCL::quaternion_to_vector(geometry_msgs::TransformStamped &ts) {
     
     quaternion_to_euler(ts);
-    eulerToRote();
-    setOverRotate4();
-    setUnderRotate4();
+    rotevec->transformPointCloud();
+
+    R = rotevec->R;
+    under_R = rotevec->under_R;
 }
 
 void ROStoPCL::run() {
