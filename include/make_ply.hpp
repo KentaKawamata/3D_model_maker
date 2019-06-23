@@ -4,15 +4,9 @@
 #include <ros/ros.h>
 #include <tf2/LinearMath/Vector3.h>
 #include <tf2/LinearMath/Quaternion.h>
-#include <tf2_ros/transform_listener.h>
-#include <tf2_ros/static_transform_broadcaster.h>
-
-#include <geometry_msgs/TransformStamped.h>
 #include <sensor_msgs/PointCloud2.h>
 
-#include <pcl/io/ply_io.h>
 #include <pcl/point_types.h>
-#include <pcl_conversions/pcl_conversions.h>
 #include <Eigen/Core>
 #include <Eigen/LU>
 
@@ -31,10 +25,10 @@ private:
     int over_pc_num;
     int under_pc_num;
 
+    char character;
+
     std::string lis_header_id;
     std::string lis_child_id;
-    std::string pub_header_id;
-    std::string pub_child_id;
 
     std::string over_cloud_frame;
     std::string under_cloud_frame;
@@ -60,14 +54,10 @@ private:
     void getOverPointCloud_callback(const sensor_msgs::PointCloud2ConstPtr &cloud_msgs);
     void getUnderPointCloud_callback(const sensor_msgs::PointCloud2ConstPtr &cloud_msgs);
 
+    void getCharacter();
+
     void addPointCloud();
     void savePointcloud();
-
-    /**
-    void eulerToRote();
-    void setOverRotate4();
-    void setUnderRotate4();
-    **/
 
     void transformPointCloud();
 

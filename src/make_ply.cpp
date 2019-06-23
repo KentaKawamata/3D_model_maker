@@ -1,11 +1,8 @@
 #include <ros/ros.h>
-#include <tf2/LinearMath/Vector3.h>
-#include <tf2/LinearMath/Quaternion.h>
 #include <tf2/LinearMath/Matrix3x3.h>
 #include <tf2_ros/transform_listener.h>
-#include <tf2_ros/static_transform_broadcaster.h>
 #include <geometry_msgs/TransformStamped.h>
-//#include <pcl_ros/transforms.h>
+#include <pcl_conversions/pcl_conversions.h>
 
 #include <pcl/common/transforms.h>
 #include <pcl/io/ply_io.h>
@@ -37,13 +34,9 @@ void ROStoPCL::set_params() {
 
     ros::param::set("/pc_tf/lis_header_id", "track_odom_frame");
     ros::param::set("/pc_tf/lis_child_id", "track_pose_frame");
-    ros::param::set("/pc_tf/pub_header_id", "track_pose_frame");
-    ros::param::set("/pc_tf/pub_child_id", "cam_1_link");
 
     ros::param::get("/pc_tf/lis_header_id", lis_header_id);
     ros::param::get("/pc_tf/lis_child_id", lis_child_id);
-    ros::param::get("/pc_tf/pub_header_id", pub_header_id);
-    ros::param::get("/pc_tf/pub_child_id", pub_child_id);
 }
 
 void ROStoPCL::check_params() {
@@ -53,13 +46,7 @@ void ROStoPCL::check_params() {
     
     } else if(!ros::param::has("/pc_tf/lis_child_id")){
         throw std::runtime_error("COULD NOT FIND PARAMS OF FRAME");
-    
-    } else if(!ros::param::has("/pc_tf/pub_header_id")){
-        throw std::runtime_error("COULD NOT FIND PARAMS OF FRAME");
-    
-    } else if(!ros::param::has("/pc_tf/pub_child_id")){
-        throw std::runtime_error("COULD NOT FIND PARAMS OF FRAME");
-    }
+    }    
 }
 
 void ROStoPCL::get_params() {
@@ -69,8 +56,6 @@ void ROStoPCL::get_params() {
         check_params();
         ros::param::get("/pc_tf/lis_header_id", lis_header_id);
         ros::param::get("/pc_tf/lis_child_id", lis_child_id);
-        ros::param::get("/pc_tf/pub_header_id", pub_header_id);
-        ros::param::get("/pc_tf/pub_child_id", pub_child_id);
 
     } catch(std::exception& ex) {
         ROS_ERROR_STREAM("=== " << ex.what() << " ===");
@@ -99,7 +84,7 @@ void ROStoPCL::savePointcloud() {
 
     std::string num = std::to_string(count);
     std::string filename = "/root/ply_data/" + num + ".ply"; 
-    ROS_INFO_STREAM("FILE NAME : " + filename);
+    ROS_INFO_STREAM("SAVE FILE NAME : " + filename);
     pcl::io::savePLYFileASCII(filename, *over_cloud_pcl);
 }
 
@@ -189,11 +174,30 @@ void ROStoPCL::quaternion_to_vector(geometry_msgs::TransformStamped &ts) {
     under_R = rotevec->under_R;
 }
 
+void ROStoPCL::getCharacter() {
+
+    ROS_INFO("===== PLEASE INPUT 's' or 'q' KEY =====");
+
+    while(true){
+
+        std::cin >> character;
+        
+        if(character == 's') {
+            break;
+        } else if(character == 'q') {
+            ROS_INFO("===== THIS NODE CLOSE =====");
+            exit(0);
+        }else{
+            ROS_ERROR("PLEASE INPUT KEY 's' or 'q' ONLY");
+        } 
+    }
+}
+
 void ROStoPCL::run() {
 
     tf2_ros::Buffer tfBuffer;
     tf2_ros::TransformListener tfListener(tfBuffer);
-    ros::Rate rate(5.0);
+    ros::Rate rate(1.0);
         
     geometry_msgs::TransformStamped ts;
 
@@ -204,7 +208,9 @@ void ROStoPCL::run() {
 
         } catch(tf2::TransformException &ex) {
             ROS_ERROR("%s", ex.what());
+            getCharacter();
             ros::Duration(1.0).sleep();
+            ros::spinOnce();
             continue;
         }
 
@@ -212,17 +218,19 @@ void ROStoPCL::run() {
         under_pc_num = under_cloud_pcl->size();
 
         if(over_pc_num>0 && under_pc_num>0) {
-            
+                
             quaternion_to_vector(ts);
             transformPointCloud();
-            ROS_INFO("=====  GET TF  =====");
             count++;
 
         } else {
             ROS_INFO("NO POINTCLOUD DATA");
         }
-        ros::spinOnce();
+
+        getCharacter();
+        
         rate.sleep();
+        ros::spinOnce();
     }    
 }
 
