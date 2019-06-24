@@ -156,13 +156,15 @@ void ROStoPCL::quaternion_to_euler(geometry_msgs::TransformStamped &ts) {
      *　｀ーー‐'　　　￣￣￣　　｀~└─―┘
      ***********************************************************************/
     ////////////////////////////////////////////////////////////
-    rotevec->roll  = -RrosX;
-    rotevec->pitch =  RrosY;
-    rotevec->yaw   =  RrosZ;
-    rotevec->under_pitch = RrosY + (40.0*M_PI/180);
+    rotevec->roll  = RrosX;
+    rotevec->pitch = -RrosY;
+    rotevec->yaw   = -RrosZ;
+    rotevec->under_pitch = -RrosY - (40.0*M_PI/180);
     ////////////////////////////////////////////////////////////
 
-    //ROS_INFO("ROLL : %f", (float)roll/M_PI*180);
+    ROS_INFO("ROLL : %f", (float)-RrosX);
+    ROS_INFO("PITCH : %f", (float)RrosY);
+    ROS_INFO("YAW : %f", (float)RrosZ);
 }
 
 void ROStoPCL::quaternion_to_vector(geometry_msgs::TransformStamped &ts) {
@@ -199,12 +201,11 @@ void ROStoPCL::run() {
     tf2_ros::TransformListener tfListener(tfBuffer);
     ros::Rate rate(1.0);
         
-    geometry_msgs::TransformStamped ts;
-
     while(ros::ok()){
 
+        geometry_msgs::TransformStamped ts;
         try{
-            ts = tfBuffer.lookupTransform(lis_header_id, lis_child_id, ros::Time());
+            ts = tfBuffer.lookupTransform(lis_header_id, lis_child_id, ros::Time(0));
 
         } catch(tf2::TransformException &ex) {
             ROS_ERROR("%s", ex.what());

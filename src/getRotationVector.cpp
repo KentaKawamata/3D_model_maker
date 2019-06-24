@@ -1,3 +1,5 @@
+#include <Eigen/Core>
+#include <Eigen/LU>
 #include "./getRotationVector.hpp"
 
 GetRotationVector::GetRotationVector() : 
@@ -62,28 +64,28 @@ void GetRotationVector::setUnderRotate4(){
 void GetRotationVector::eulerToRote(){
 
     Eigen::Matrix3d Rpi;
-    Eigen::Matrix3d Ryo;
+    Eigen::Matrix3d Rya;
     Eigen::Matrix3d Rro;
     Eigen::Matrix3d under_Rpi;
 
     Rpi << 1, 0, 0,  
-           0, cos(pitch), sin(pitch),  
-           0, -sin(pitch), cos(pitch); 
+           0, cos(pitch), -sin(pitch),  
+           0, sin(pitch), cos(pitch); 
 
-    Ryo << cos(yaw), 0, -sin(yaw), 
+    Rya << cos(yaw), 0, sin(yaw), 
            0, 1, 0, 
-           sin(yaw), 0, cos(yaw);
+           -sin(yaw), 0, cos(yaw);
 
-    Rro << cos(roll), sin(roll), 0, 
-           -sin(roll), cos(roll), 0, 
+    Rro << cos(roll), -sin(roll), 0, 
+           sin(roll), cos(roll), 0, 
            0, 0, 1; 
 
     under_Rpi << 1, 0, 0,  
-           0, cos(under_pitch), sin(under_pitch),  
-           0, -sin(under_pitch), cos(under_pitch); 
+           0, cos(under_pitch), -sin(under_pitch),  
+           0, sin(under_pitch), cos(under_pitch); 
 
-    R3d = Rpi * Ryo * Rro;
-    under_R3d = under_Rpi * Ryo * Rro;
+    R3d = Rya * Rro * Rpi;
+    under_R3d = Rya * Rro * under_Rpi;
 }
 
 void GetRotationVector::transformPointCloud() {
