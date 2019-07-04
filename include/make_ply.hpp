@@ -2,6 +2,7 @@
 #define MAKE_PLY_H
 
 #include <ros/ros.h>
+#include <std_msgs/UInt32.h>
 #include <tf2/LinearMath/Vector3.h>
 #include <tf2/LinearMath/Quaternion.h>
 #include <sensor_msgs/PointCloud2.h>
@@ -25,17 +26,21 @@ private:
     int over_pc_num;
     int under_pc_num;
 
+    uint32_t confidence;
+
     char character;
 
     std::string lis_header_id;
     std::string lis_child_id;
 
+    std::string lis_conf;
     std::string over_cloud_frame;
     std::string under_cloud_frame;
 
     tf2::Vector3 translation;
     tf2::Quaternion rotation;
 
+    ros::Subscriber conf_sub;
     ros::Subscriber over_cloud_sub;
     ros::Subscriber under_cloud_sub;
 
@@ -53,6 +58,7 @@ private:
 
     void getOverPointCloud_callback(const sensor_msgs::PointCloud2ConstPtr &cloud_msgs);
     void getUnderPointCloud_callback(const sensor_msgs::PointCloud2ConstPtr &cloud_msgs);
+    void getConfidence_callback(const std_msgs::UInt32& msg);
 
     void getCharacter();
 

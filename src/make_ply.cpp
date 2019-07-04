@@ -14,9 +14,11 @@ ROStoPCL::ROStoPCL(ros::NodeHandle &nh) :
     under_cloud_pcl (new pcl::PointCloud<pcl::PointXYZ>()),
     R (Eigen::Matrix4d::Identity()),
     under_R (Eigen::Matrix4d::Identity()),
+    lis_conf("/track/confidence"),
     over_cloud_frame ("/cam_1/depth/color/points"),
     under_cloud_frame ("/cam_2/depth/color/points"),
     count (0),
+    conf_sub(nh.subscribe(lis_conf, 1, &ROStoPCL::getConfidence_callback, this)),
     over_cloud_sub(nh.subscribe(over_cloud_frame, 1, &ROStoPCL::getOverPointCloud_callback, this)),
     under_cloud_sub(nh.subscribe(under_cloud_frame, 1, &ROStoPCL::getUnderPointCloud_callback, this))
 {
@@ -61,6 +63,11 @@ void ROStoPCL::get_params() {
         ROS_ERROR_STREAM("=== " << ex.what() << " ===");
         set_params();
     } 
+}
+
+void ROStoPCL::getConfidence_callback(const std_msgs::UInt32& msg) {
+
+    confidence = msg.data;
 }
 
 void ROStoPCL::getOverPointCloud_callback(const sensor_msgs::PointCloud2ConstPtr &cloud_msgs) {
@@ -218,11 +225,19 @@ void ROStoPCL::run() {
         over_pc_num = over_cloud_pcl->size();
         under_pc_num = under_cloud_pcl->size();
 
-        if(over_pc_num>0 && under_pc_num>0) {
+        if((over_pc_num>0 && under_pc_num>0) && confidence==3) {
                 
             quaternion_to_vector(ts);
             transformPointCloud();
             count++;
+
+        } else if(confidence <= 2) {
+            ROS_INFO("T265 data error");
+
+            /**
+             * fpfh
+             * icp   flow
+             * **/
 
         } else {
             ROS_INFO("NO POINTCLOUD DATA");
