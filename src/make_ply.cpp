@@ -25,11 +25,13 @@ ROStoPCL::ROStoPCL(ros::NodeHandle &nh) :
     get_params();
     rotevec = new GetRotationVector();
     edit = new EditCloud();
+    registrate = new registration::registration_pc();
 }
 
 ROStoPCL::~ROStoPCL() {
     delete rotevec; 
     delete edit;
+    delete registrate;
 }
 
 void ROStoPCL::set_params() {
@@ -108,6 +110,35 @@ void ROStoPCL::transformPointCloud() {
     pcl::transformPointCloud(*under_cloud_pcl, *under_cloud_pcl, under_R); 
 
     addPointCloud();
+    savePointcloud();
+}
+
+void ROStoPCL::transformPointCloud_for_ICP() {
+
+    registrate->count = count;        
+
+    /**
+     *  If T265's data is not trusty, 
+     *  over_cloud_pcl and under_cloud_pcl is rotated by 
+     *  T265's data before untrusty.
+     * **/
+    pcl::copyPointCloud(*over_cloud_pcl, *(edit->over_cloud));
+    pcl::copyPointCloud(*under_cloud_pcl, *(edit->under_cloud));
+    edit->filter();
+
+    pcl::copyPointCloud(*(edit->over_cloud), *over_cloud_pcl);
+    pcl::copyPointCloud(*(edit->under_cloud), *under_cloud_pcl);
+
+    pcl::transformPointCloud(*over_cloud_pcl, *over_cloud_pcl, R); 
+    pcl::transformPointCloud(*under_cloud_pcl, *under_cloud_pcl, under_R); 
+
+    addPointCloud();
+
+    pcl::copyPointCloud(*over_cloud_pcl, *(registrate->cloud));
+    registrate->registrate_for_ROS_to_PCL();
+
+    pcl::copyPointCloud(*(registrate->cloud), *over_cloud_pcl);
+    
     savePointcloud();
 }
 
@@ -234,6 +265,7 @@ void ROStoPCL::run() {
         } else if(confidence <= 2) {
             ROS_INFO("T265 data error");
 
+            transformPointCloud_for_ICP();
             /**
              * fpfh
              * icp   flow

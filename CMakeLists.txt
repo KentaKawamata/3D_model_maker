@@ -217,6 +217,8 @@ add_executable(${PROJECT_NAME}
   include/editCloud.hpp
   src/getRotationVector.cpp
   include/getRotationVector.hpp
+  src/registration_pc.cpp
+  include/registration_pc.hpp
 )
 
 ## Rename C++ executable without prefix
