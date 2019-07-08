@@ -39,7 +39,7 @@ void EditCloud::smooth() {
     pcl::copyPointCloud(mls_points, *cloud);
 }
 
-void EditCloud::rangeFilter() {
+void EditCloud::rangeFilter_under() {
 
     pcl::PassThrough<pcl::PointXYZ> passX;
     passX.setInputCloud(cloud);
@@ -58,7 +58,31 @@ void EditCloud::rangeFilter() {
     pcl::PassThrough<pcl::PointXYZ> passZ;
     passZ.setInputCloud(cloud);
     passZ.setFilterFieldName("z");
-    passZ.setFilterLimits(0.3, 3.0);
+    passZ.setFilterLimits(0.5, 3.0);
+    passZ.setFilterLimitsNegative(false);
+    passZ.filter(*cloud);
+}
+
+void EditCloud::rangeFilter_over() {
+
+    pcl::PassThrough<pcl::PointXYZ> passX;
+    passX.setInputCloud(cloud);
+    passX.setFilterFieldName("x");
+    passX.setFilterLimits(-2.0, 2.0);
+    passX.setFilterLimitsNegative(false);
+    passX.filter(*cloud);
+
+    pcl::PassThrough<pcl::PointXYZ> passY;
+    passY.setInputCloud(cloud);
+    passY.setFilterFieldName("y");
+    passY.setFilterLimits(-3.0, 3.0);
+    passY.setFilterLimitsNegative(false);
+    passY.filter(*cloud);
+
+    pcl::PassThrough<pcl::PointXYZ> passZ;
+    passZ.setInputCloud(cloud);
+    passZ.setFilterFieldName("z");
+    passZ.setFilterLimits(3.0, 4.5);
     passZ.setFilterLimitsNegative(false);
     passZ.filter(*cloud);
 }
@@ -88,7 +112,7 @@ void EditCloud::filter() {
 
     //over_cloud
     pcl::copyPointCloud(*over_cloud, *cloud);
-    rangeFilter();
+    rangeFilter_over();
     outline();
     pcl::copyPointCloud(*cloud, *over_cloud);
 
@@ -96,7 +120,7 @@ void EditCloud::filter() {
 
     //under_cloud
     pcl::copyPointCloud(*under_cloud, *cloud);
-    rangeFilter();
+    rangeFilter_under();
     outline();
     pcl::copyPointCloud(*cloud, *under_cloud);
 }

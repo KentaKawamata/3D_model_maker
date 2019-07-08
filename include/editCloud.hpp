@@ -20,7 +20,8 @@ public:
 private:
 
     void smooth();
-    void rangeFilter();
+    void rangeFilter_over();
+    void rangeFilter_under();
     void outline();
 };
 
