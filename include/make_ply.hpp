@@ -13,7 +13,6 @@
 
 #include "./../include/getRotationVector.hpp"
 #include "./../include/editCloud.hpp"
-#include "./../include/registration_pc.hpp"
 
 class ROStoPCL {
 
@@ -62,7 +61,6 @@ private:
     void getConfidence_callback(const std_msgs::UInt32& msg);
 
     void getCharacter();
-    void transformPointCloud_for_ICP();
 
     void addPointCloud();
     void savePointcloud();
@@ -80,7 +78,6 @@ public:
 
     GetRotationVector *rotevec;
     EditCloud *edit; 
-    registration::registration_pc *registrate;    
 
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 };

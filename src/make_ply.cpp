@@ -25,13 +25,11 @@ ROStoPCL::ROStoPCL(ros::NodeHandle &nh) :
     get_params();
     rotevec = new GetRotationVector();
     edit = new EditCloud();
-    registrate = new registration::registration_pc();
 }
 
 ROStoPCL::~ROStoPCL() {
     delete rotevec; 
     delete edit;
-    delete registrate;
 }
 
 void ROStoPCL::set_params() {
@@ -114,55 +112,15 @@ void ROStoPCL::transformPointCloud() {
     savePointcloud();
 }
 
-void ROStoPCL::transformPointCloud_for_ICP() {
-
-    registrate->count = count;        
-
-    /**
-     *  If T265's data is not trusty, 
-     *  over_cloud_pcl and under_cloud_pcl is rotated by 
-     *  T265's data before untrusty.
-     * **/
-    pcl::copyPointCloud(*over_cloud_pcl, *(edit->over_cloud));
-    pcl::copyPointCloud(*under_cloud_pcl, *(edit->under_cloud));
-    edit->filter();
-
-    pcl::copyPointCloud(*(edit->over_cloud), *over_cloud_pcl);
-    pcl::copyPointCloud(*(edit->under_cloud), *under_cloud_pcl);
-
-    pcl::transformPointCloud(*over_cloud_pcl, *over_cloud_pcl, R); 
-    pcl::transformPointCloud(*under_cloud_pcl, *under_cloud_pcl, under_R); 
-
-    addPointCloud();
-
-    pcl::copyPointCloud(*over_cloud_pcl, *(registrate->cloud));
-    registrate->registrate_for_ROS_to_PCL();
-
-    pcl::copyPointCloud(*(registrate->cloud), *over_cloud_pcl);
-    
-    savePointcloud();
-}
-
 void ROStoPCL::quaternion_to_euler(geometry_msgs::TransformStamped &ts) {
 
     translation.setValue(ts.transform.translation.x,
                          ts.transform.translation.y,
                          ts.transform.translation.z);
 
-    /*************************************************************************
-     * < Must not toutch tpclZ, tpclY and tpclX !!!!!      >
-     * < tpclZ, tpclY and tpclX are completely correct !!! >
-     *         \  ^__^
-     *          \ (oo)\______
-     *           (__)\    )\/\
-     *              ||----w |
-     *              ||    ||
-     ***********************************************************************/
-    //////////////////////////////////
     rotevec->tpclZ =  translation.getX();
     rotevec->tpclY = -translation.getZ();
     rotevec->tpclX = -translation.getY();
-    //////////////////////////////////
 
     rotation.setValue(ts.transform.rotation.x,
                       ts.transform.rotation.y,
@@ -172,34 +130,10 @@ void ROStoPCL::quaternion_to_euler(geometry_msgs::TransformStamped &ts) {
     tf2::Matrix3x3 m(rotation);
     m.getRPY(RrosX, RrosY, RrosZ);
 
-    /*************************************************************************
-     * Must not toutch roll, pitch and yaw !!!!!
-     * Roll, pitch and yaw are completely correct !!!
-     * 
-     *    　　　　　　　_,ｨ￣￣￣￣ 7ｰ ､
-     *　　 　 _,. -'" .| ' ''　　'　　''|l　　｀ ｰｫ､_
-     *　　　/ , 　,,　|　'　'　　''　'|l　'　　'' '|;;;;;;l 　＿＿
-     *　　 /　　　　| ::　　　　　 |l 　 　 　.|;;;;;;|￣r--ｧ￣､＼__
-     *　　/___ , , , ,| ::　　　　　 |　　,　　,,|;;;;;{ --'-=（=　乂 rﾄ}
-     *　 ﾑ==ｧ--､ｰ､- - - - ァ=======ｲ{ZZZZZZｲ三ｴﾆｲ==-
-     *　　 {Yヽ0ﾉ} } ＼!!!＿/;;;;;{：{0} }};;;;;ｲ}￣
-     *　　　 | | | |-t==t-''￣￣~ | | | l|i:::i:l|
-     *　　　.|_U_l|　|:i::i:l| 　 　 　　ﾞ|_U_l|::::::l|
-     *　 　｜l　ｌ|　 | ::::l|　 　 　 　 | l　l|::::::l|
-     *　 　 |r-､l| 　 Y=Y}　 　 　　 Y^ 米o;}}
-     *　 　 ﾄ-.イ 　　ﾄ-ィ| 　 　 　 ｀ﾄ-ィ|Y;/
-     *　 　,|　 ｌ| 　 　 |　 l|　　 　 　 ,|　i, |/
-     *　　(0)(0) 　　　!n人9､　　／ｨ(0)(0)}
-     *　/ri￣|^}　　　{ T￣|^}／Ｘ:;; {T==ｲｺ
-     *　|二=--{､　　|三三三}＼/三r-----{
-     *　｀ーー‐'　　　￣￣￣　　｀~└─―┘
-     ***********************************************************************/
-    ////////////////////////////////////////////////////////////
     rotevec->roll  = RrosX;
     rotevec->pitch = -RrosY;
     rotevec->yaw   = -RrosZ;
     rotevec->under_pitch = -RrosY - (40.0*M_PI/180);
-    ////////////////////////////////////////////////////////////
 
     ROS_INFO("ROLL : %f", (float)-RrosX);
     ROS_INFO("PITCH : %f", (float)RrosY);
@@ -257,17 +191,14 @@ void ROStoPCL::run() {
         over_pc_num = over_cloud_pcl->size();
         under_pc_num = under_cloud_pcl->size();
 
-        if((over_pc_num>0 && under_pc_num>0) && confidence>=2) {
-                
+        if((over_pc_num>0 && under_pc_num>0) && confidence>=2) 
+        {
             quaternion_to_vector(ts);
             transformPointCloud();
             count++;
-
-        } else if(confidence < 2) {
-            ROS_WARN_STREAM("T265 data error, confidence : " + std::to_string(confidence) );
-            //transformPointCloud_for_ICP();
-
-        } else {
+        } 
+        else 
+        {
             ROS_INFO("NO POINTCLOUD DATA");
         }
 
