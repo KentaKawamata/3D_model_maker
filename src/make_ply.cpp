@@ -12,7 +12,7 @@
 ROStoPCL::ROStoPCL(ros::NodeHandle &nh) : 
     cloud_pcl (new pcl::PointCloud<pcl::PointXYZ>()),
     R (Eigen::Matrix4d::Identity()),
-    cloud_frame ("/cam_1/depth/color/points"),
+    cloud_frame ("/camera/depth/color/points"),
     count (0),
     filename ("/root/datas/model_for_RT/3d_model.ply"),
     cloud_sub(nh.subscribe(cloud_frame, 1, &ROStoPCL::getOverPointCloud_callback, this))

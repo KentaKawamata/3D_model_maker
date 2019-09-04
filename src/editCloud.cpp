@@ -56,7 +56,7 @@ void EditCloud::rangeFilter()
     pcl::PassThrough<pcl::PointXYZ> passZ;
     passZ.setInputCloud(cloud);
     passZ.setFilterFieldName("z");
-    passZ.setFilterLimits(0.0, 0.30);
+    passZ.setFilterLimits(0.30, 0.60);
     passZ.setFilterLimitsNegative(false);
     passZ.filter(*cloud);
 }

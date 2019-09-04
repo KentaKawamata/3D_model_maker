@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<launch>
+
+    <arg name="track_serial_no"        default="845412110931"/>
+    <arg name="track_camera"           default="track"/>
+
+    <arg name="depth_serial_no"  default="838212070287"/>
+    <arg name="depth_camera"      default="camera"/>
+
+    <arg name="lis_header_id"       default="track_odom_frame" />
+    <arg name="lis_child_id"        default="track_pose_frame" />
+    <arg name="pub_header_id"       default="track_pose_frame" />
+    <arg name="pub_child_id"        default="$(arg depth_camera)_link" />
+
+    <include file="$(find realsense2_camera)/launch/rs_t265Name.launch" >
+        <arg name="serial_no"   value="$(arg track_serial_no)"/>
+        <arg name="camera"      value="$(arg track_camera)"/>
+    </include>
+
+    <include file="$(find realsense2_camera)/launch/rs_camera.launch" >
+        <arg name="serial_no"   value="$(arg depth_serial_no)"/>
+        <arg name="camera"      value="$(arg depth_camera)"/>
+    </include>
+    
+    <include file="$(find pc_tf)/launch/pc_transform.launch" >
+        <arg name="lis_header_id"   value="$(arg lis_header_id)" /> 
+        <arg name="lis_child_id"    value="$(arg lis_child_id)" /> 
+        <arg name="pub_header_id"   value="$(arg pub_header_id)" /> 
+        <arg name="pub_child_id"    value="$(arg pub_child_id)" /> 
+    </include>
+
+</launch>
