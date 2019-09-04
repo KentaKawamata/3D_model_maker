@@ -280,7 +280,7 @@ void ROStoPCL::run() {
 
 int main(int argc, char *argv[]) {
 
-    ros::init(argc, argv, "get_pointcloud");
+    ros::init(argc, argv, "model_maker");
     ros::NodeHandle nh;
 
     ROStoPCL *get_pcl;
