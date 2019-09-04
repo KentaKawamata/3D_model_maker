@@ -1,5 +1,6 @@
 #include <pcl/filters/passthrough.h>
 #include <pcl/filters/statistical_outlier_removal.h>
+#include <pcl/filters/voxel_grid.h>
 #include <pcl/surface/mls.h>
 #include <cmath>
 #include <iostream>
@@ -77,6 +78,15 @@ void EditCloud::outline()
     */
     //pcl::PLYWriter writer;
     //writer.write<pcl::PointXYZ> ("/home/kawa/program/calc3D/data/outline.ply", *newCloud, false);
+}
+
+void EditCloud::voxel_grid()
+{
+    float size = 0.0128f;
+    std::shared_ptr<pcl::VoxelGrid<pcl::PointXYZ>> sor (new pcl::VoxelGrid<pcl::PointXYZ>);
+    sor->setInputCloud(cloud);
+    sor->setLeafSize(size, size, size);
+    sor->filter(*cloud);
 }
 
 void EditCloud::filter() 
