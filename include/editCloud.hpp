@@ -13,15 +13,12 @@ public:
     void filter();
 
     pcl::PointCloud<pcl::PointXYZ>::Ptr cloud;
-    pcl::PointCloud<pcl::PointXYZ>::Ptr over_cloud;
-    pcl::PointCloud<pcl::PointXYZ>::Ptr under_cloud;
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW 
 
 private:
 
     void smooth();
-    void rangeFilter_over();
-    void rangeFilter_under();
+    void rangeFilter();
     void outline();
 };
 

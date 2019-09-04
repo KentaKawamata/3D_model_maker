@@ -9,8 +9,6 @@
 
 EditCloud::EditCloud() : 
     cloud (new pcl::PointCloud<pcl::PointXYZ>()),
-    over_cloud (new pcl::PointCloud<pcl::PointXYZ>()),
-    under_cloud (new pcl::PointCloud<pcl::PointXYZ>())
 {
 }
 
@@ -39,60 +37,36 @@ void EditCloud::smooth() {
     pcl::copyPointCloud(mls_points, *cloud);
 }
 
-void EditCloud::rangeFilter_under() {
-
+void EditCloud::rangeFilter()
+{
     pcl::PassThrough<pcl::PointXYZ> passX;
     passX.setInputCloud(cloud);
     passX.setFilterFieldName("x");
-    passX.setFilterLimits(-2.0, 2.0);
+    passX.setFilterLimits(-0.15, 0.15);
     passX.setFilterLimitsNegative(false);
     passX.filter(*cloud);
 
     pcl::PassThrough<pcl::PointXYZ> passY;
     passY.setInputCloud(cloud);
     passY.setFilterFieldName("y");
-    passY.setFilterLimits(-2.0, 3.0);
+    passY.setFilterLimits(-0.10, 0.10);
     passY.setFilterLimitsNegative(false);
     passY.filter(*cloud);
 
     pcl::PassThrough<pcl::PointXYZ> passZ;
     passZ.setInputCloud(cloud);
     passZ.setFilterFieldName("z");
-    passZ.setFilterLimits(0.5, 3.0);
+    passZ.setFilterLimits(0.0, 0.30);
     passZ.setFilterLimitsNegative(false);
     passZ.filter(*cloud);
 }
 
-void EditCloud::rangeFilter_over() {
-
-    pcl::PassThrough<pcl::PointXYZ> passX;
-    passX.setInputCloud(cloud);
-    passX.setFilterFieldName("x");
-    passX.setFilterLimits(-2.0, 2.0);
-    passX.setFilterLimitsNegative(false);
-    passX.filter(*cloud);
-
-    pcl::PassThrough<pcl::PointXYZ> passY;
-    passY.setInputCloud(cloud);
-    passY.setFilterFieldName("y");
-    passY.setFilterLimits(-3.0, 3.0);
-    passY.setFilterLimitsNegative(false);
-    passY.filter(*cloud);
-
-    pcl::PassThrough<pcl::PointXYZ> passZ;
-    passZ.setInputCloud(cloud);
-    passZ.setFilterFieldName("z");
-    passZ.setFilterLimits(3.0, 4.5);
-    passZ.setFilterLimitsNegative(false);
-    passZ.filter(*cloud);
-}
-
-void EditCloud::outline(){
-
+void EditCloud::outline()
+{
     pcl::StatisticalOutlierRemoval<pcl::PointXYZ> sor;
     sor.setInputCloud(cloud);
     sor.setMeanK(50);
-    sor.setStddevMulThresh(1.0);
+    sor.setStddevMulThresh(0.5);
     sor.filter(*cloud);
 
     /*     
@@ -106,21 +80,9 @@ void EditCloud::outline(){
     //writer.write<pcl::PointXYZ> ("/home/kawa/program/calc3D/data/outline.ply", *newCloud, false);
 }
 
-void EditCloud::filter() {
-
-    cloud.reset(new pcl::PointCloud<pcl::PointXYZ>);
-
+void EditCloud::filter() 
+{
     //over_cloud
-    pcl::copyPointCloud(*over_cloud, *cloud);
-    rangeFilter_over();
+    rangeFilter();
     outline();
-    pcl::copyPointCloud(*cloud, *over_cloud);
-
-    cloud.reset(new pcl::PointCloud<pcl::PointXYZ>);
-
-    //under_cloud
-    pcl::copyPointCloud(*under_cloud, *cloud);
-    rangeFilter_under();
-    outline();
-    pcl::copyPointCloud(*cloud, *under_cloud);
 }
