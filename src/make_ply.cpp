@@ -14,6 +14,7 @@ ROStoPCL::ROStoPCL(ros::NodeHandle &nh) :
     R (Eigen::Matrix4d::Identity()),
     cloud_frame ("/cam_1/depth/color/points"),
     count (0),
+    filename ("/root/datas/model_for_RT/3d_model.ply"),
     cloud_sub(nh.subscribe(cloud_frame, 1, &ROStoPCL::getOverPointCloud_callback, this))
 {
     get_params();
@@ -69,10 +70,25 @@ void ROStoPCL::getOverPointCloud_callback(const sensor_msgs::PointCloud2ConstPtr
 
 void ROStoPCL::savePointcloud() {
 
-    std::string num = std::to_string(count);
-    std::string filename = "/root/ply_data/" + num + ".ply"; 
-    ROS_INFO_STREAM("SAVE FILE NAME : " + filename);
-    pcl::io::savePLYFileASCII(filename, *cloud_pcl);
+    if (count > 0)
+    {
+        pcl::PointCloud<pcl::PointXYZ>::Ptr total_cloud (new pcl::PointCloud<pcl::PointXYZ>());
+        pcl::io::loadPLYFile(filename, *total_cloud);
+
+        *total_cloud += *cloud_pcl;
+    
+        pcl::copyPointCloud(*total_cloud, *(edit->cloud));
+        edit->out_filter();
+        pcl::copyPointCloud(*(edit->cloud), *total_cloud);
+
+        ROS_INFO_STREAM("SAVE FILE NAME : " + filename);
+        pcl::io::savePLYFileASCII(filename, *total_cloud);
+    }
+    else 
+    {
+        ROS_INFO_STREAM("SAVE FILE NAME : " + filename);
+        pcl::io::savePLYFileASCII(filename, *cloud_pcl);
+    }
 }
 
 void ROStoPCL::transformPointCloud() {

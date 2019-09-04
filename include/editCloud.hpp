@@ -11,6 +11,7 @@ public:
     EditCloud();
     ~EditCloud();
     void filter();
+    void out_filter();
 
     pcl::PointCloud<pcl::PointXYZ>::Ptr cloud;
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW 

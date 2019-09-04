@@ -1,5 +1,4 @@
 #include <pcl/filters/passthrough.h>
-//#include <pcl/common/transforms.h>
 #include <pcl/filters/statistical_outlier_removal.h>
 #include <pcl/surface/mls.h>
 #include <cmath>
@@ -8,7 +7,7 @@
 #include "./../include/editCloud.hpp"
 
 EditCloud::EditCloud() : 
-    cloud (new pcl::PointCloud<pcl::PointXYZ>()),
+    cloud (new pcl::PointCloud<pcl::PointXYZ>())
 {
 }
 
@@ -82,7 +81,11 @@ void EditCloud::outline()
 
 void EditCloud::filter() 
 {
-    //over_cloud
     rangeFilter();
+    outline();
+}
+
+void EditCloud::out_filter()
+{
     outline();
 }

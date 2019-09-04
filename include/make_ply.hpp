@@ -18,6 +18,8 @@ class ROStoPCL {
 
 private:
 
+    std::string filename;
+
     double RrosX;
     double RrosY;
     double RrosZ;
