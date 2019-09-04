@@ -21,6 +21,8 @@ private:
     void smooth();
     void rangeFilter();
     void outline();
+    void voxel_grid();
+    void remove_plane();
 };
 
 #endif //EDIT_CLOUD_H

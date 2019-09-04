@@ -2,6 +2,11 @@
 #include <pcl/filters/statistical_outlier_removal.h>
 #include <pcl/filters/voxel_grid.h>
 #include <pcl/surface/mls.h>
+
+#include <pcl/sample_consensus/method_types.h>
+#include <pcl/sample_consensus/model_types.h>
+#include <pcl/segmentation/sac_segmentation.h>
+
 #include <cmath>
 #include <iostream>
 
@@ -89,8 +94,37 @@ void EditCloud::voxel_grid()
     sor->filter(*cloud);
 }
 
+void EditCloud::remove_plane()
+{
+    pcl::ModelCoefficients::Ptr coefficients (new pcl::ModelCoefficients);
+    pcl::PointIndices::Ptr inliers (new pcl::PointIndices);
+    pcl::SACSegmentation<pcl::PointXYZ> seg;
+    
+    seg.setOptimizeCoefficients(true);
+    seg.setModelType(pcl::SACMODEL_PLANE);
+    seg.setMethodType(pcl::SAC_RANSAC);
+    seg.setDistanceThreshold(0.01);
+    seg.setInputCloud(cloud);
+    seg.segment(*inliers, *coefficients);
+
+    if (inliers->indices.size() == 0)
+    {
+
+    }
+    else
+    {
+        for (size_t i=0; i<inliers->indices.size(); ++i)
+        {
+            cloud->points[inliers->indices[i]].x = -1.0;
+            cloud->points[inliers->indices[i]].y = -1.0;
+            cloud->points[inliers->indices[i]].z = -1.0;
+        }
+    }
+}
+
 void EditCloud::filter() 
 {
+    remove_plane();
     rangeFilter();
     outline();
 }
