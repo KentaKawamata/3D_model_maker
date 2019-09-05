@@ -33,8 +33,8 @@ void GetRotationVector::setRotate4(){
     R(2,2) = R3d(2,2);
 
     R(0,3) = tpclX; 
-    R(1,3) = tpclY - 0.045; 
-    R(2,3) = tpclZ - 0.6;
+    R(1,3) = tpclY - 0.40; 
+    R(2,3) = tpclZ - 0.05;
     R(3,3) = 1.0;
 }
 
